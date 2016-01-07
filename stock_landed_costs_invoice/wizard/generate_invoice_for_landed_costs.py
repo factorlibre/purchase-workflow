@@ -70,8 +70,8 @@ class LandedCostGenerateInvoice(models.TransientModel):
         # we should get it from the journal id on the cost.
         # OR get it from the expense account from the product.
         account_id = cost_line.account_id and cost_line.account_id.id or False
+        product = cost_line.product_id
         if not account_id:
-            product = cost_line.product_id
             account = product.property_account_expense or \
                 product.categ_id.property_account_expense_categ
             account_id = account and account.id
@@ -130,10 +130,13 @@ class LandedCostGenerateInvoice(models.TransientModel):
         partner = partner_obj.browse(partner_id)
         # prepare the invoice lines data
         line_data = self.prepare_inv_line(lines)
+        inv_name = self._get_inv_name(lines)
+        if isinstance(inv_name, list):
+            inv_name = ' - '.join(inv_name)
         invoice_id = invoice_obj.create(
             {
-                'name': self._get_inv_name(lines),
-                'origin': self._get_inv_name(lines),
+                'name': inv_name,
+                'origin': inv_name,
                 'date_invoice': invoice_date,
                 'user_id': self.env.user.id,
                 'partner_id': partner_id,
@@ -161,7 +164,7 @@ class LandedCostGenerateInvoice(models.TransientModel):
                     lines, partner_id=partner_id, journal_id=journal_id,
                     invoice_date=self.invoice_date)
                 invoice_ids.append(invoice_id)
-            self.invoice_creationg_hook()
+            # self.invoice_creationg_hook()
         domain = "[('id','in', [" + ','.join(map(str, invoice_ids)) + "])]"
         return {
             'domain': domain,

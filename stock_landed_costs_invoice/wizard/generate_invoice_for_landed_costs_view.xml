@@ -6,10 +6,12 @@
             <field name="model">landed.cost.generate.invoice</field>
             <field name="arch" type="xml">
                 <form string="Select Landed Costs" version="7.0">
-                    <group>
-                        <label string="Do you want to generate the selected Landed Costs?"/>
-                        <field name="invoice_date" />
-                    </group>
+                    <div>
+                        <p>Do you want to generate the selected Landed Costs?</p>
+                        <group>
+                            <field name="invoice_date" />
+                        </group>
+                    </div>
                     <footer>
                         <button name="make_invoices" string="Confirm" type="object" class="oe_highlight"/>
                         or

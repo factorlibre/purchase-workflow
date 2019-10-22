@@ -44,7 +44,7 @@ class StockLandedCostLines(models.Model):
     @api.model
     def _default_currency(self):
         '''Default currency is the company currency'''
-        currency_id = self.env.user.company_id.currency_id.id
+        currency_id = self.env.user.company_id.currency_id
         return currency_id
 
     # TODO dp digit

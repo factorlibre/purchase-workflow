@@ -22,13 +22,11 @@ msgid "Purchase Order"
 msgstr "Pedido de compra"
 
 #. module: purchase_order_uninvoiced_amount
-#: model_terms:ir.ui.view,arch_db:purchase_order_uninvoiced_amount.purchase_order_tree
-#: model_terms:ir.ui.view,arch_db:purchase_order_uninvoiced_amount.purchase_order_view_tree
-#, fuzzy
+#: model:ir.ui.view,arch_db:purchase_order_uninvoiced_amount.purchase_order_tree
 msgid "Total Uninvoiced amount"
 msgstr "Total pendiente facturar"
 
 #. module: purchase_order_uninvoiced_amount
-#: model:ir.model.fields,field_description:purchase_order_uninvoiced_amount.field_purchase_order__amount_uninvoiced
+#: model:ir.model.fields,field_description:purchase_order_uninvoiced_amount.field_purchase_order_amount_uninvoiced
 msgid "Uninvoiced Amount"
 msgstr "Pendiente facturar"

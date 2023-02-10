@@ -13,5 +13,6 @@
     "application": False,
     "installable": True,
     "depends": ["purchase"],
+    "pre_init_hook": "pre_init_hook",
     "data": ["views/purchase_order_view.xml"],
 }

@@ -4,7 +4,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
 from odoo import fields
-from odoo.tests.common import Form, SavepointCase
+from odoo.tests.common import SavepointCase
 
 
 class TestPurchaseOrderUninvoiceAmount(SavepointCase):
@@ -13,6 +13,7 @@ class TestPurchaseOrderUninvoiceAmount(SavepointCase):
         # Environmet
         self.purchase_order_model = self.env["purchase.order"]
         self.purchase_order_line_model = self.env["purchase.order.line"]
+        self.account_invoice_model = self.env['account.invoice']
         self.account_move_model = self.env["account.move"]
         self.res_partner_model = self.env["res.partner"]
         self.product_product_model = self.env["product.product"]
@@ -26,16 +27,6 @@ class TestPurchaseOrderUninvoiceAmount(SavepointCase):
         # Category
         self.product_categ = self.product_category_model.create(
             {"name": "Test category"}
-        )
-        self.uom_categ = self.env["uom.category"].create({"name": "Category 1"})
-        self.uom1 = self.env["uom.uom"].create(
-            {
-                "name": "UOM 1",
-                "category_id": self.uom_categ.id,
-                "factor": 1,
-                "active": True,
-                "uom_type": "reference",
-            }
         )
         # Products
         self.product_category = self.env["product.category"].create(
@@ -75,12 +66,14 @@ class TestPurchaseOrderUninvoiceAmount(SavepointCase):
         return purchase
 
     def _create_invoice_from_purchase(self, purchase):
-        invoice_form = Form(
-            self.account_move_model.with_context(default_type="in_invoice")
-        )
-        invoice_form.partner_id = purchase.partner_id
-        invoice_form.purchase_id = purchase
-        return invoice_form.save()
+        invoice = self.account_invoice_model.create({
+            'partner_id': purchase.partner_id.id,
+            'purchase_id': purchase.id,
+            'account_id': purchase.partner_id.property_account_payable_id.id,
+            'type': 'in_invoice',
+        })
+        invoice.purchase_order_change()
+        return invoice
 
     def test_create_purchase_and_not_invoiced(self):
         purchase = self._create_purchase(1, 1)
@@ -105,9 +98,7 @@ class TestPurchaseOrderUninvoiceAmount(SavepointCase):
         purchase = self._create_purchase(10, 5)
         self.assertEquals(purchase.amount_uninvoiced, 500)
         invoice = self._create_invoice_from_purchase(purchase)
-        with Form(invoice) as invoice_form:
-            with invoice_form.invoice_line_ids.edit(0) as line_form:
-                line_form.quantity = 3
+        invoice.invoice_line_ids.quantity = 3
         self.assertEquals(purchase.amount_uninvoiced, 200)
 
     def test_create_purchase_create_and_invoiced_with_all_units(self):
@@ -126,9 +117,7 @@ class TestPurchaseOrderUninvoiceAmount(SavepointCase):
         purchase = self._create_purchase(10, 0)
         self.assertEquals(purchase.amount_uninvoiced, 1000)
         invoice = self._create_invoice_from_purchase(purchase)
-        with Form(invoice) as invoice_form:
-            with invoice_form.invoice_line_ids.edit(0) as line_form:
-                line_form.quantity = 6
+        invoice.invoice_line_ids.quantity = 6
         self.assertEquals(purchase.amount_uninvoiced, 400)
         self._create_invoice_from_purchase(purchase)
         self.assertEquals(purchase.amount_uninvoiced, 0)
@@ -137,7 +126,5 @@ class TestPurchaseOrderUninvoiceAmount(SavepointCase):
         purchase = self._create_purchase(10, 10)
         self.assertEquals(purchase.amount_uninvoiced, 1000)
         invoice = self._create_invoice_from_purchase(purchase)
-        with Form(invoice) as invoice_form:
-            with invoice_form.invoice_line_ids.edit(0) as line_form:
-                line_form.quantity = 20
+        invoice.invoice_line_ids.quantity = 20
         self.assertEquals(purchase.amount_uninvoiced, -1000)

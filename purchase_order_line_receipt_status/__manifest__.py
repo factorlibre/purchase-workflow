@@ -7,6 +7,7 @@
     "author": "Camptocamp, Italo Lopes, Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "category": "Purchase",
+    "pre_init_hook": "pre_init_hook",
     "depends": [
         # Core
         "purchase_stock",
